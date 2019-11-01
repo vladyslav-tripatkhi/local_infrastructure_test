@@ -1,0 +1,105 @@
+---
+# - name: create docker network for kafka cluster
+#   docker_network:
+#     name: kafka_network
+#     ipam_config:
+#       - subnet: 172.3.28.0/24
+
+- name: launch zookeeper container
+  docker_container:
+    name: zookeeper
+    image: wurstmeister/zookeeper
+    ports:
+      - 2181:2181
+    volumes:
+      - /opt/zookeeper_data:/opt/zookeeper-3.4.13/data
+    purge_networks: true
+    networks:
+      - name: "{{ docker_network_name }}"
+    etc_hosts:
+      monitoring.example.test: 192.169.56.102
+    restart_policy: always
+
+- name: create jolokia dir
+  file:
+    path: /opt/jolokia
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: install jolokia agent
+  get_url:
+    url: https://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/1.6.2/jolokia-jvm-1.6.2-agent.jar
+    dest: /opt/jolokia/jolokia-jvm-1.6.2.jar
+    mode: 0755
+    owner: root
+    group: root
+
+- name: link jolokia jar
+  file:
+    src: '/opt/jolokia/jolokia-jvm-1.6.2.jar'
+    dest: '/opt/jolokia/jolokia-jvm.jar'
+    state: link
+    force: true
+
+- name: launch kafka_containers
+  docker_container:
+    name: "kafka-{{ kafka_index }}"
+    hostname: "kafka-{{ kafka_index }}"
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - "909{{ kafka_index }}:909{{ kafka_index }}"
+      - "877{{ kafka_index }}:8778"
+    env:
+      KAFKA_BROKER_ID: "{{ kafka_index }}"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka-{{ kafka_index }}:909{{ kafka_index }}"
+      KAFKA_OPTS: -javaagent:/opt/jolokia-jvm.jar=host=0.0.0.0
+      KAFKA_LOG_DIRS: /kafka-logs
+    volumes:
+      - "/opt/kafka-logs-{{ kafka_index }}:/kafka-logs"
+      - /opt/jolokia/jolokia-jvm.jar:/opt/jolokia-jvm.jar
+    purge_networks: true
+    networks:
+      - name: "{{ docker_network_name }}"
+    links:
+      - zookeeper:zookeeper
+    restart_policy: unless-stopped
+  with_sequence: count=3
+  loop_control:
+    loop_var: kafka_index
+
+- name: sleep 15 seconds unitl kafka cluster is ready
+  pause:
+    seconds: 15
+
+- name: check if kafka topic exists
+  shell: docker exec kafka-1 bash -c "kafka-topics --list --topic kafka_vector_topic --zookeeper zookeeper:2181"
+  ignore_errors: true
+  register: kafka_topic_exists
+
+- name: debug
+  debug:
+    msg: "{{ kafka_topic_exists }}"
+
+- name: stop telegraf if it is running
+  docker_container:
+    name: telegraf
+    state: stopped
+  ignore_errors: true
+  when: kafka_topic_exists.stdout_lines
+
+- name: delete kafka topic if it exists
+  shell: docker exec kafka-1 bash -c "kafka-topics --delete --topic kafka_vector_topic --zookeeper zookeeper:2181"
+  ignore_errors: true
+  when: kafka_topic_exists.stdout_lines
+
+- name: wait 5 seconds for topic deletion
+  pause:
+    seconds: 5
+  when: kafka_topic_exists.stdout_lines
+
+- name: try creating kafka topic
+  shell: docker exec kafka-1 bash -c "kafka-topics --create --topic kafka_vector_topic --replication-factor 1 --partitions 3 --zookeeper zookeeper:2181"
+  ignore_errors: true

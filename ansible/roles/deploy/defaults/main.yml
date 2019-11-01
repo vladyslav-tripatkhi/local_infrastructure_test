@@ -1,0 +1,27 @@
+---
+# Pip configuration defaults
+pip_configure: true
+pip_upgrade: true
+
+# Flog configuration defaults
+flog_repo_url: https://github.com/vladyslav-tripatkhi/flog.git
+flog_repo_dest: /opt/flog
+flog_repo_branch: master
+
+flog_build_image: true
+flog_image_name: tripatkhy/flog_with_stats
+flog_image_tag: "0.01"
+
+# Telegraf configs
+telegraf_config_dir: /opt/telegraf
+telegraf_config_file: telegraf.conf
+
+log_collector_name: fluent-bit
+log_collector_available_names: [
+  vector,
+  fluent-bit
+]
+log_collector_extra_hosts:
+  kafka-1: 192.169.56.102
+  kafka-2: 192.169.56.102
+  kafka-3: 192.169.56.102

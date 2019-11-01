@@ -1,0 +1,27 @@
+---
+- name: ensure that telegraf config dir exists
+  file:
+    path: "{{ telegraf_config_dir }}"
+    state: directory
+    mode: 0644
+    owner: root
+    group: root
+
+- name: check if log collector specific telegraf config exists
+  stat:
+    path: "{{ role_path }}/vars/telegraf_config/{{ log_collector_name }}.yml"
+  register: override_telegraf_config
+  when: ("log_collector" in applications)
+
+- name: override telegraf config if specific configuration exists
+  include_vars:
+    file: "telegraf_config/{{ log_collector_name }}.yml"
+  when: ("log_collector" in applications)
+    and (override_telegraf_config.stat.exists)
+
+- name: configure telegraf
+  template:
+    src: "{{ telegraf_config_template }}"
+    dest: "{{ telegraf_config_dir }}/{{ telegraf_config_file }}"
+    mode: 0644
+  # notify: update telegraf config

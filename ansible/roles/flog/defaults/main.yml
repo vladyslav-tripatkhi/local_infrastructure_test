@@ -1,0 +1,6 @@
+---
+# defaults file for flog
+flog_version: 0.3.1
+flog_arch: linux_amd64
+flog_write_speed: 0.0005
+flog_test_log_file: /tmp/test_log/test.log

@@ -1,0 +1,19 @@
+# Mac OSX DS_Store folders
+**/.DS_Store
+
+# IDE-specific files
+.idea
+.vscode
+# *.code-workspace
+
+# Python virtualenv directory
+virtualenv
+
+# VM config file
+config.yml
+
+# Vagrant directories
+**/.vagrant
+
+# Vagrant box files
+base/*.box

@@ -1,0 +1,15 @@
+version: "2"
+services:
+  flog:
+    image: mingrammer/flog:0.3.1
+    container_name: flog
+    command: ["-d", "0.01", "-t", "log", "-o", "/tmp/test_log/test.log"]
+    volumes:
+      - /tmp/test_log:/tmp/test_log
+  
+  vector:
+    image: timberio/vector:0.5.0-debian
+    container_name: vector
+    volume:
+      - /opt/vector/vector.toml:/etc/vector/vector.toml:ro
+      - /tmp/test_log:/tmp/test_log

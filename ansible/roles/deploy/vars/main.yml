@@ -1,0 +1,6 @@
+---
+# Flog configuration variables
+flog_image_full_name: "{{ flog_image_name }}:{{ flog_image_tag }}"
+
+
+telegraf_config_template: "{{ telegraf_config_file }}.j2"

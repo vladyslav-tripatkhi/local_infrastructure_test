@@ -1,0 +1,87 @@
+---
+# - name: create monitoring docker network
+#   docker_network:
+#     name: monitoring_network
+#     ipam_config:
+#       - subnet: 172.3.27.0/24
+
+- name: launch influxdb container
+  docker_container:
+    name: influxdb
+    image: influxdb:1.7.8
+    ports:
+      - 8086:8086
+    volumes:
+      - /opt/influxdb:/var/lib/influxdb
+    purge_networks: true
+    networks:
+      - name: "{{ docker_network_name }}"
+    restart_policy: always
+
+#ToDo: move user configuration into the separate task?
+
+- name: ensure that grafana group exists
+  group:
+    gid: 472
+    name: grafana
+    system: true
+    state: present
+
+- name: ensure that grafana user exists
+  user:
+    uid: 472
+    name: grafana
+    group: grafana
+    create_home: no
+    shell: /usr/bin/false
+    state: present
+
+- name: create grafana data dir and set ownership to grafana users
+  file:
+    path: /opt/grafana
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: 0755
+
+- name: launch grafana container
+  docker_container:
+    name: grafana
+    image: grafana/grafana:6.4.3
+    env:
+      GF_SECURITY_ADMIN_PASSWORD: secret
+    ports:
+      - 3000:3000
+    volumes:
+      - /opt/grafana:/var/lib/grafana
+    purge_networks: true
+    networks:
+      - name: "{{ docker_network_name }}"
+    restart_policy: always
+
+- name: sleep 10 seconds unitl grafana starts
+  pause:
+    seconds: 10
+
+#ToDo: move datasource configuration into the separate task?
+- name: configure influxdb datasource
+  grafana_datasource:
+    name: datasource-influxdb
+    ds_type: influxdb
+    database: telegraf
+    grafana_user: admin
+    grafana_password: secret
+    grafana_url: http://localhost:3000
+    org_id: "1"
+    ds_url: "http://influxdb:8086"
+    time_interval: ">10s"
+    is_default: true
+
+- name: configure grafana dashboard
+  grafana_dashboard:
+    grafana_url: http://localhost:3000
+    grafana_user: admin
+    grafana_password: secret
+    message: Updated by ansible
+    overwrite: yes
+    path: "{{ role_path }}/files/container-dashboard.json"

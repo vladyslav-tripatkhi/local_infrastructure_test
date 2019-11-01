@@ -1,0 +1,5 @@
+---
+# handlers file for deploy_docker-compose
+- name: check telegraf config file
+  shell: docker exec telegraf bash -c "telegraf --test >/dev/null 2>&1"
+  listen: "update telegraf config"

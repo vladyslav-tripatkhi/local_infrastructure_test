@@ -1,0 +1,14 @@
+---
+- name: restart ntp service
+  service:
+    name: ntp
+    state: restarted
+  when:
+    ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: restart ntpd service
+  service:
+    name: ntpd
+    state: restarted
+  when:
+    ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'

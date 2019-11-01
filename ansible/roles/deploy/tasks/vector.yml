@@ -1,0 +1,90 @@
+---
+- name: create docker network
+  docker_network:
+    name: test_network
+    ipam_config:
+      - subnet: 172.3.27.0/24
+
+- name: configure log rotation for flog
+  template:
+    src: flog_logrotate.j2
+    dest: /etc/logrotate.d/flog_logrotate
+    mode: 0644
+    owner: root
+    group: root
+
+- name: add frequent rotation to flog logs
+  cron:
+    name: Rotate Flog log files
+    minute: "*"
+    job: "/usr/sbin/logrotate /etc/logrotate.d/flog_logrotate"
+    state: present
+    user: root
+
+- name: run vector
+  docker_container:
+    name: vector
+    image: timberio/vector:0.5.0-debian
+    state: started
+    volumes:
+      - /opt/vector/config.toml:/etc/vector/vector.toml:ro
+      - /tmp/test_log:/tmp/test_log
+    etc_hosts:
+      kafka-1: 192.169.56.102
+      kafka-2: 192.169.56.102
+      kafka-3: 192.169.56.102
+    networks:
+      - name: test_network
+
+- name: run telegraf
+  docker_container:
+    name: telegraf
+    image: telegraf
+    privileged: true
+    state: started
+    ports:
+      - 8125:8125/udp
+    etc_hosts:
+      monitoring.example.test: 192.169.56.102
+    volumes:
+      - /opt/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /tmp/telegraf/:/tmp/telegraf/
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - name: test_network
+
+- name: clone flog from git
+  git:
+    repo: https://github.com/vladyslav-tripatkhi/flog.git
+    dest: /opt/flog_with_stats
+    version: master
+  register: changes
+
+- name: build flog docker image
+  docker_image:
+    name: flog_with_stats
+    build:
+      path: /opt/flog_with_stats
+      dockerfile: Dockerfile
+      nocache: true
+    tag: v1
+    source: build
+    state: present
+
+- name: run flog
+  docker_container:
+    name: flog
+    # image: mingrammer/flog:0.3.1
+    image: flog_with_stats:v1
+    command: [
+      "-d", "0.0005",
+      "-t", "log",
+      "-o", "/tmp/test_log/test.log", 
+      "-m", "telegraf",
+      "-c", "flog.vector.",
+      "-l", "-w"
+    ]
+    volumes:
+      - /tmp/test_log:/tmp/test_log
+    networks:
+      - name: test_network

@@ -1,0 +1,5 @@
+---
+# defaults file for collectd
+collectd_install_docker_plugin: true
+
+pip_upgrade: true

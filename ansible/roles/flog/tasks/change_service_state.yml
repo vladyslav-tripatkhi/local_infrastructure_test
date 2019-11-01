@@ -1,0 +1,5 @@
+---
+- name: change test_log service state
+  systemd:
+    name: test_log
+    state: "{{ flog_service_state }}"

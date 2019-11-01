@@ -1,0 +1,19 @@
+---
+- name: clone flog from git
+  git:
+    repo: "{{ flog_repo_url }}"
+    dest: "{{ flog_repo_dest }}"
+    version: "{{ flog_repo_branch }}"
+
+- name: build flog docker image
+  docker_image:
+    name: "{{ flog_image_name }}"
+    build:
+      path: "{{ flog_repo_dest }}"
+      dockerfile: Dockerfile
+      nocache: true
+    tag: "{{ flog_image_tag }}"
+    source: build
+    state: present
+
+# ToDo: cleanup docker image's build stage and repo directory if asked

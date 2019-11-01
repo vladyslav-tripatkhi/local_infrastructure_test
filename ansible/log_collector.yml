@@ -1,0 +1,9 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: true
+  vars:
+    applications:
+      - log_collector
+  roles:
+    - deploy

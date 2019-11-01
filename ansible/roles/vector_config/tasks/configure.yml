@@ -1,0 +1,14 @@
+---
+- name: ensure that vector config dir exists
+  file:
+    path: /opt/vector
+    state: directory
+    mode: 0644
+    owner: root
+    group: root
+
+- name: configure vector
+  template:
+    src: "{{ configuration_file }}"
+    dest: /opt/vector/config.toml
+    mode: 0644

@@ -1,0 +1,7 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: true
+  roles:
+    - system_pre_configuration
+    - install_docker

@@ -1,0 +1,9 @@
+vagrant_insecure_key_download: true
+
+vagrant_user: vagrant
+vagrant_group: vagrant
+vagrant_home_dir: /home/vagrant
+
+vagrant_ssh_dir: "{{ vagrant_home_dir }}/.ssh "
+
+vagrant_pubkey_url: https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub

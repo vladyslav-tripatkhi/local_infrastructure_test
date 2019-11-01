@@ -1,0 +1,54 @@
+---
+- name: check for terraform installation
+  become: yes
+  stat:
+    path: '{{ terraform_binary_dir }}'
+  changed_when: False
+  register: terraform_binary
+
+- name: Install terraform if it is not present
+  when: not terraform_binary.stat.exists
+  block:
+    - name: ensure that unzip is installed
+      package:
+        name: unzip
+        state: present
+
+    - name: download terraform zip
+      get_url:
+        url: '{{ terraform_url }}'
+        dest: '/tmp/{{ terraform_zip }}'
+        checksum: '{{ terraform_checksum_url }}'
+        mode: 0644
+      become: true
+
+    - name: create directory for terraform binary
+      file:
+        path: '{{ terraform_binary_dir }}'
+        state: directory
+        mode: 0755
+        owner: root
+        group: root
+      become: true
+
+    - name: extract terraform from the archive
+      unarchive:
+        remote_src: true
+        src: '/tmp/{{ terraform_zip }}'
+        dest: '{{ terraform_binary_dir }}'
+        creates: '{{ terraform_binary_dir }}/terraform'
+      become: true
+
+  always:
+    - name: cleanup terraform archive
+      file:
+        path: '{{ terraform_zip }}'
+        state: absent
+      become: true
+
+- name: link terraform
+  file:
+    src: '{{ terraform_binary_dir }}/terraform'
+    dest: '{{ terraform_install_dir }}/terraform'
+    state: link
+    force: '{{ terraform_force_override }}'

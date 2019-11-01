@@ -1,0 +1,44 @@
+---
+- name: ensure that old packages are not present
+  package:
+    name: '{{ item }}'
+    state: absent
+  with_items:
+    - docker
+    - docker-engine
+    - docker.io
+    - containerd
+    - runc
+
+- name: install dependencies
+  package:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+
+- name: add docker gpg key
+  apt_key:
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+  register: add_repository_key
+  ignore_errors: '{{ docker_apt_ignore_key_error }}'
+
+- name: add docker repo key using curl if apt_key has failed
+  shell: |
+    set -o pipefail
+    curl -sSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  args:
+    warn: false
+  when: add_repository_key is failed
+
+- name: add docker repo
+  apt_repository:
+    repo: '{{ docker_apt_repo }}'
+    state: present
+    update_cache: true

@@ -1,0 +1,29 @@
+---
+- hosts: all
+  remote_user: vagrant
+  become: true
+  vector: vector
+  vars:
+    applications:
+      - vector
+    input_plugins:
+      - name: docker
+        attributes:
+          endpoint: "unix:///var/run/docker.sock"  
+          gather_services: false
+          container_name_include: []
+          container_name_exclude: []
+          timeout: "5s"
+          total: false
+      - name: statsd
+        attributes:
+          protocol: "udp"
+          max_tcp_connections: 250
+          tcp_keep_alive: false
+          service_address: ":8125"
+          delete_gauges: false
+          metric_separator: "_"
+  roles:
+    - "{{ vector }}_config"
+    - telegraf_config
+    - deploy

@@ -1,0 +1,24 @@
+---
+- name: ensure that python-pip is installed
+  package:
+    name: python-pip
+    state: present
+
+- name: upgrade pip
+  pip:
+    name: pip
+    state: latest
+  when: (pip_upgrade | bool)
+
+- name: ensure that docker-py package is not installed
+  pip:
+    name: docker-py
+    state: absent
+
+- name: install python-docker sdk
+  pip:
+    name: [
+      docker,
+      docker-compose
+    ]
+    state: latest

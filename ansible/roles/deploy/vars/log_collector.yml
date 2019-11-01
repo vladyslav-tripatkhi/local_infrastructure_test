@@ -1,0 +1,36 @@
+docker_network:
+  name: log_collector_network
+  subnet: 172.3.29.0/24
+#ToDo: Add an ability to add http input to telegraf for fluent-bit
+telegraf_config:
+  input_plugins:
+    - name: docker
+      attributes:
+        endpoint: "unix:///var/run/docker.sock"  
+        gather_services: false
+        container_name_include: []
+        container_name_exclude: []
+        timeout: "5s"
+        total: false
+    - name: statsd
+      attributes:
+        protocol: "udp"
+        max_tcp_connections: 250
+        tcp_keep_alive: false
+        service_address: ":8125"
+        delete_gauges: false
+        metric_separator: "_"
+  output_plugins:
+    - name: file
+      attributes:
+        files: ["/tmp/telegraf/telegraf.out"]
+        rotation_interval: "5m"
+        rotation_max_archives: 3
+        data_format: "json"
+    - name: influxdb
+      attributes:
+        urls: ["http://monitoring.example.test:8086"]
+        database: "telegraf"
+        skip_database_creation: false
+        timeout: "5s"
+        user_agent: "telegraf"

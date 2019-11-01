@@ -1,0 +1,9 @@
+---
+# tasks file for flog
+- name: install flog
+  include_tasks: install.yml
+
+- name: start flog
+  include_tasks: change_service_state.yml
+  vars:
+    flog_service_state: started

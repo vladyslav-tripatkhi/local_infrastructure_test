@@ -1,0 +1,19 @@
+---
+# tasks file for telegraf_config
+- name: debug
+  debug:
+    msg: "{{ telegraf_config }}"
+# - name: ensure that telegraf config dir exists
+#   file:
+#     path: "{{ telegraf_config_dir }}"
+#     state: directory
+#     mode: 0644
+#     owner: root
+#     group: root
+
+# - name: configure telegraf
+#   template:
+#     src: "{{ telegraf_config_template }}"
+#     dest: "{{ telegraf_config_dir }}/{{ telegraf_config_file }}"
+#     mode: 0644
+  # notify: update telegraf config

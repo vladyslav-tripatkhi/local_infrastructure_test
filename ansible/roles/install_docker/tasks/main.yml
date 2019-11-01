@@ -1,0 +1,30 @@
+---
+- name: setup docker on ubuntu
+  include_tasks: install_Debian.yml
+  when: ansible_os_family == "Debian"
+
+- name: install docker packages
+  package:
+    name: '{{ item }}'
+    state: present
+    force: '{{ docker_force_install }}'
+  with_items: '{{ docker_packages }}'
+  notify: restart docker
+
+- name: start and enable docker
+  service:
+    name: docker
+    state: '{{ docker_service_state }}'
+    enabled: '{{ docker_service_enabled }}'
+
+- name: ensure handlers are notified now to avoid firewall conflicts.
+  meta: flush_handlers
+
+- name: install docker compose
+  include_tasks: install_docker-compose.yml
+  when: docker_compose_install | bool
+
+- name: add users to docker group
+  include_tasks: add_users_to_docker_group.yml
+  when:
+    (docker_users is defined) and (docker_users | length > 0)

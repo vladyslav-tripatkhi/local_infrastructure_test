@@ -1,0 +1,48 @@
+---
+- name: build flog docker image
+  include_tasks: build_flog.yml
+  when: (flog_build_image | bool)
+
+- name: ensure that log collector config dir exists
+  file:
+    path: "{{ log_collector_config_dir }}"
+    state: directory
+    mode: 0644
+    owner: root
+    group: root
+
+- name: configure log collector
+  template:
+    src: "{{ log_collector_config_template }}"
+    dest: "{{ log_collector_config_dir }}/{{ log_collector_config_file }}"
+    mode: 0644
+
+- name: launch vector container
+  docker_container:
+    name: vector
+    image: timberio/vector:0.5.0-debian
+    state: started
+    volumes:
+      - "{{ log_collector_config_dir }}/{{ log_collector_config_file }}:/etc/vector/vector.toml:ro"
+      - /tmp/test_log:/tmp/test_log
+    etc_hosts: "{{ log_collector_extra_hosts }}"
+    networks:
+      - name: "{{ docker_network_name }}"
+    when: (log_collector_name == "vector")
+      or (log_collector_name not in log_collector_available_names)
+
+- name: launch fluent-bit container
+  docker_container:
+    name: fluent-bit
+    image: fluent/fluent-bit:1.3.2
+    state: started
+    volumes:
+      - "{{ log_collector_config_dir }}/{{ log_collector_config_file }}:/fluent-bit/etc/fluent-bit.conf:ro"
+      - "{{ log_collector_config_dir }}/database:/opt/fluent-bit/database"
+      - /tmp/test_log:/tmp/test_log
+    etc_hosts: "{{ log_collector_extra_hosts }}"
+    ports:
+      - 2020:2020
+    networks:
+      - name: "{{ docker_network_name }}"
+    when: log_collector_name == "fluent-bit"

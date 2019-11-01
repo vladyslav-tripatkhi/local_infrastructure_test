@@ -1,0 +1,44 @@
+---
+- name: download flog binary
+  get_url:
+    url: https://github.com/mingrammer/flog/releases/download/v{{ flog_version }}/flog_{{ flog_version }}_{{ flog_arch }}.tar.gz
+    dest: /tmp/flog_{{ flog_version }}.tar.gz
+    mode: 0755
+    owner: root
+    group: root
+
+- name: ensure that unarchiver is present
+  package:
+    name: unzip
+    state: present
+
+- name: extract flog from archive
+  unarchive:
+    remote_src: true
+    src: '/tmp/flog_{{ flog_version }}.tar.gz'
+    dest: '/usr/local/bin'
+    creates: '/usr/local/bin/flog_{{ flog_version }}'
+
+- name: link flog release to the current bin
+  file:
+    src: '/usr/local/bin/flog'
+    dest: '/usr/local/bin/flog_{{ flog_version }}'
+    state: link
+    force: true
+
+- name: create flog service
+  template:
+    src: test_log_service.j2
+    dest: /etc/systemd/system/test_log.service
+
+- name: ensure that flog service is stopped
+  systemd:
+    name: test_log
+    daemon_reload: true
+    enabled: no
+    state: stopped
+
+- name: add logrotate config
+  template:
+    src: test_logrotate.j2
+    dest: /etc/logrotate.d/test_log

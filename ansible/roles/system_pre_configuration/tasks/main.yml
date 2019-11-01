@@ -1,0 +1,33 @@
+---
+# - name: download vagrant insecure public key
+#   include_tasks: vagrant_insecure_key.yml
+#   when: (vagrant_insecure_key_download is defined) and 
+#     (vagrant_insecure_key_download|bool)
+
+- name: Install ntp service
+  package:
+    name: ntp
+    update_cache: yes
+    state: present
+  notify:
+    - restart ntp service
+  when:
+    ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: ensure that ntpd server is installed and latest version
+  yum:
+    name: ntpd
+    update_cache: yes
+    state: present
+  notify:
+    - restart ntpd service
+  when:
+      ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: add crontab entry that syncs time every five minutes on Debian hosts
+  cron:
+    name: Sync time on vagrant every five minutes
+    minute: "*/5"
+    job: "service ntp stop; ntpd -gq; service ntp start"
+    state: present
+    user: root

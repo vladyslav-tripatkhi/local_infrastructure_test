@@ -1,0 +1,23 @@
+{% for input_plugin in telegraf_config.input_plugins %}
+[[inputs.{{ input_plugin.name }}]]
+{% for attribute_key, attribute_value in input_plugin.attributes.items() %}
+  {{ attribute_key }} = {{ attribute_value | to_json }}
+{% endfor %}
+
+{% if 'metrics' in input_plugin %}
+{% for metric in input_plugin.metrics %}
+  [[inputs.{{ input_plugin.name }}.metric]]
+{% for metric_key, metric_value in metric.items() %}
+    {{ metric_key }} = {{ metric_value | to_json }}
+{% endfor %}
+
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+{% for output_plugin in telegraf_config.output_plugins %}
+[[outputs.{{ output_plugin.name }}]]
+{% for attribute_key, attribute_value in output_plugin.attributes.items() %}
+  {{ attribute_key }} = {{ attribute_value | to_json }}
+{% endfor %}
+{% endfor %}

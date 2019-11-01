@@ -1,0 +1,58 @@
+---
+# tasks file for deploy_docker-compose
+- name: include application-specific variables
+  include_vars:
+    file: "{{ item }}.yml"
+    name: "{{ item }}"
+  with_items: "{{ applications }}"
+
+- name: debug
+  debug:
+    msg: "{{ vars[item] }}"
+  with_items: "{{ applications }}"
+
+- name: configure python docker sdk
+  include_tasks: install_pip_requirements.yml
+  when: (pip_configure | bool)
+
+- name: set up docker networks
+  docker_network:
+    name: "{{ vars[item]['docker_network']['name'] }}"
+    ipam_config:
+      - subnet: "{{ vars[item]['docker_network']['subnet'] }}"
+  with_items: "{{ applications }}"
+
+- name: configure telegraf
+  include_tasks: configure_telegraf.yml
+  vars:
+    telegraf_config: "{{ vars[item]['telegraf_config'] }}"
+  when: (vars[item]["telegraf_config"] is defined)
+  with_items: "{{ applications }}"
+
+- name: launch telegraf container
+  docker_container:
+    name: telegraf
+    image: telegraf
+    privileged: true
+    state: started
+    purge_networks: true
+    etc_hosts:
+      monitoring.example.test: 192.169.56.102
+    volumes:
+      - /opt/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /tmp/telegraf/:/tmp/telegraf/
+      - /var/run/docker.sock:/var/run/docker.sock
+
+- name: add telegraf to all the existing application networks
+  docker_network:
+    name: "{{ vars[item]['docker_network']['name'] }}"
+    connected:
+      - telegraf
+    appends: true
+  with_items: "{{ applications }}"
+
+- name: deploy applications
+  include_tasks: "{{ item }}.yml"
+  vars:
+    docker_network_name: "{{ vars[item]['docker_network']['name'] }}"
+  with_items: "{{ applications }}"

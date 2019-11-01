@@ -1,0 +1,17 @@
+---
+- name: ensure that vagrant ssh directory exists
+  file:
+    path: "{{ vagrant_ssh_dir }}"
+    state: directory
+    owner: "{{ vagrant_user }}"
+    group: "{{ vagrant_group }}"
+    mode: 0700
+
+- name: download vagrant insecure public key
+  get_url:
+    url: https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub
+    dest: "{{ vagrant_ssh_dir }}authorized_keys"
+    owner: "{{ vagrant_user }}"
+    group: "{{ vagrant_group }}"
+    mode: 0600
+    
