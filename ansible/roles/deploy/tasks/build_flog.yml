@@ -16,4 +16,23 @@
     source: build
     state: present
 
-# ToDo: cleanup docker image's build stage and repo directory if asked
+- name: list dangling docker image ids
+  shell: docker images -f "dangling=true" -q
+  register: docker_dangling_ids
+  when: (flog_image_clean_cache | bool)
+
+- name: debug
+  debug:
+    msg: "{{ docker_dangling_ids }}"
+  when: (flog_image_clean_cache | bool)
+
+- name: remove flog docker image cache
+  shell: "docker rmi {{ docker_dangling_ids.stdout_lines | join(' ') }}"
+  when: (flog_image_clean_cache | bool)
+    and (docker_dangling_ids.stdout_lines is defined)
+
+- name: remove flog repository
+  file:
+    path: "{{ flog_repo_dest }}/"
+    state: absent
+  when: (flog_repo_cleanup | bool)

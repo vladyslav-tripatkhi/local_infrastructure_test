@@ -1,6 +1,12 @@
 ---
 # Flog configuration variables
 flog_image_full_name: "{{ flog_image_name }}:{{ flog_image_tag }}"
-
+flog_repords_per_second: 10000
 
 telegraf_config_template: "{{ telegraf_config_file }}.j2"
+
+log_collector_config_dir: "/opt/{{ log_collector_name }}"
+
+log_collector_config_ext: "{{ 'toml' if log_collector_name == 'vector' else 'conf' }}"
+log_collector_config_file: "{{ log_collector_name }}.{{ log_collector_config_ext }}"
+log_collector_config_template: "{{ log_collector_config_file }}.j2"

@@ -7,17 +7,22 @@
     owner: root
     group: root
 
-- name: check if log collector specific telegraf config exists
-  stat:
-    path: "{{ role_path }}/vars/telegraf_config/{{ log_collector_name }}.yml"
-  register: override_telegraf_config
-  when: ("log_collector" in applications)
+# - name: check if log collector specific telegraf config exists
+#   stat:
+#     path: "{{ role_path }}/vars/telegraf_config/{{ log_collector_name }}.yml"
+#   register: override_telegraf_config
+#   when: ("log_collector" in applications)
 
-- name: override telegraf config if specific configuration exists
-  include_vars:
-    file: "telegraf_config/{{ log_collector_name }}.yml"
-  when: ("log_collector" in applications)
-    and (override_telegraf_config.stat.exists)
+# - name: override telegraf config if specific configuration exists
+#   include_vars:
+#     file: "telegraf_config/{{ log_collector_name }}.yml"
+#     name: override_telegraf_config
+#   when: ("log_collector" in applications)
+#     and (override_telegraf_config.stat.exists)
+
+# - name: debug
+#   debug:
+#     msg: "{{ override_telegraf_config }}"
 
 - name: configure telegraf
   template:

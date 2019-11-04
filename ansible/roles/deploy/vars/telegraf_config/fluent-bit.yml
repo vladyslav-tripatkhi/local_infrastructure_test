@@ -1,28 +1,27 @@
-telegraf_config:
-  input_plugins:
-    - name: docker
-      attributes:
-        endpoint: "unix:///var/run/docker.sock"  
-        gather_services: false
-        container_name_include: []
-        container_name_exclude: []
-        timeout: "5s"
-        total: false
-    - name: http
-      attributes:
-        urls: ["http://fluent-bit:2020/api/v1/metrics"]
-        data_format: "json"
-  output_plugins:
-    - name: file
-      attributes:
-        files: ["/tmp/telegraf/telegraf.out"]
-        rotation_interval: "5m"
-        rotation_max_archives: 3
-        data_format: "json"
-    - name: influxdb
-      attributes:
-        urls: ["http://monitoring.example.test:8086"]
-        database: "telegraf"
-        skip_database_creation: false
-        timeout: "5s"
-        user_agent: "telegraf"
+input_plugins:
+  - name: docker
+    attributes:
+      endpoint: "unix:///var/run/docker.sock"
+      gather_services: false
+      container_name_include: []
+      container_name_exclude: []
+      timeout: "5s"
+      total: false
+  - name: http
+    attributes:
+      urls: ["http://fluent-bit:2020/api/v1/metrics"]
+      data_format: "json"
+output_plugins:
+  - name: file
+    attributes:
+      files: ["/tmp/telegraf/telegraf.out"]
+      rotation_interval: "5m"
+      rotation_max_archives: 3
+      data_format: "json"
+  - name: influxdb
+    attributes:
+      urls: ["http://monitoring.example.test:8086"]
+      database: "telegraf"
+      skip_database_creation: false
+      timeout: "5s"
+      user_agent: "telegraf"

@@ -3,12 +3,4 @@
     size 2M
 
     missingok
-    
-    prerotate
-        docker stop flog
-    endscript
-
-    postrotate
-        docker start flog
-    endscript
 }

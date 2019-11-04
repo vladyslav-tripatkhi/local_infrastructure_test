@@ -28,8 +28,8 @@
     etc_hosts: "{{ log_collector_extra_hosts }}"
     networks:
       - name: "{{ docker_network_name }}"
-    when: (log_collector_name == "vector")
-      or (log_collector_name not in log_collector_available_names)
+  when: (log_collector_name == "vector")
+    or (log_collector_name not in log_collector_available_names)
 
 - name: launch fluent-bit container
   docker_container:
@@ -45,4 +45,36 @@
       - 2020:2020
     networks:
       - name: "{{ docker_network_name }}"
-    when: log_collector_name == "fluent-bit"
+  when: log_collector_name == "fluent-bit"
+
+- name: configure log rotation for flog
+  template:
+    src: flog_logrotate.j2
+    dest: /etc/logrotate.d/flog_logrotate
+    mode: 0644
+    owner: root
+    group: root
+
+- name: configure log rotation for flog
+  cron:
+    name: Rotate Flog log files
+    minute: "*"
+    job: "/usr/sbin/logrotate /etc/logrotate.d/flog_logrotate"
+    state: present
+    user: root
+
+- name: launch flog container
+  docker_container:
+    name: flog
+    image: "{{ flog_image_full_name }}"
+    state: started
+    command: [
+      "-n", "{{ flog_repords_per_second }}"
+    ]
+    env:
+      SLEEP_TIME: "1"
+      LOG_FILE_PATH: "/tmp/test_log/test.log"
+    volumes:
+      - /tmp/test_log:/tmp/test_log
+    networks:
+      - name: "{{ docker_network_name }}"

@@ -7,10 +7,12 @@ pip_upgrade: true
 flog_repo_url: https://github.com/vladyslav-tripatkhi/flog.git
 flog_repo_dest: /opt/flog
 flog_repo_branch: master
+flog_repo_cleanup: false
 
 flog_build_image: true
 flog_image_name: tripatkhy/flog_with_stats
 flog_image_tag: "0.01"
+flog_image_clean_cache: true
 
 # Telegraf configs
 telegraf_config_dir: /opt/telegraf
