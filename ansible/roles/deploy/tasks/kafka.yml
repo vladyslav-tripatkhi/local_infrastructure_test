@@ -83,13 +83,6 @@
   debug:
     msg: "{{ kafka_topic_exists }}"
 
-- name: stop telegraf if it is running
-  docker_container:
-    name: telegraf
-    state: stopped
-  ignore_errors: true
-  when: kafka_topic_exists.stdout_lines
-
 - name: delete kafka topic if it exists
   shell: docker exec kafka-1 bash -c "kafka-topics --delete --topic kafka_vector_topic --zookeeper zookeeper:2181"
   ignore_errors: true

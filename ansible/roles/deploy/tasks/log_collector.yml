@@ -17,6 +17,13 @@
     dest: "{{ log_collector_config_dir }}/{{ log_collector_config_file }}"
     mode: 0644
 
+- name: cleanup log directory contents
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_fileglob:
+    - "/tmp/test_log/*"
+
 - name: launch vector container
   docker_container:
     name: vector
@@ -69,7 +76,8 @@
     image: "{{ flog_image_full_name }}"
     state: started
     command: [
-      "-n", "{{ flog_repords_per_second }}"
+      "-n", "{{ flog_repords_per_second }}",
+      "-m", "telegraf"
     ]
     env:
       SLEEP_TIME: "1"

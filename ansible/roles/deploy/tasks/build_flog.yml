@@ -30,6 +30,7 @@
   shell: "docker rmi {{ docker_dangling_ids.stdout_lines | join(' ') }}"
   when: (flog_image_clean_cache | bool)
     and (docker_dangling_ids.stdout_lines is defined)
+    and (docker_dangling_ids.stdout_lines | bool)
 
 - name: remove flog repository
   file:

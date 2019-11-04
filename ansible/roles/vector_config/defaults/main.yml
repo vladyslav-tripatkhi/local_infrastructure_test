@@ -1,5 +1,0 @@
----
-# defaults file for vector
-configuration_file: config.toml
-vector_daemon_reload: false
-vector_initial_config: true

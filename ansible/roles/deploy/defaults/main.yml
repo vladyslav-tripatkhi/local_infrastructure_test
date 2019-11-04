@@ -14,15 +14,16 @@ flog_image_name: tripatkhy/flog_with_stats
 flog_image_tag: "0.01"
 flog_image_clean_cache: true
 
-# Telegraf configs
+# Telegraf configuration defaults
 telegraf_config_dir: /opt/telegraf
 telegraf_config_file: telegraf.conf
 
-log_collector_name: fluent-bit
+# Log collector configuration defaults
 log_collector_available_names: [
   vector,
   fluent-bit
 ]
+log_collector_name: vector
 log_collector_extra_hosts:
   kafka-1: 192.169.56.102
   kafka-2: 192.169.56.102

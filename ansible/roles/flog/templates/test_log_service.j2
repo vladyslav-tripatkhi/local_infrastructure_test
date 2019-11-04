@@ -1,9 +1,0 @@
-[Unit]
-Description = Write logs to text file using Flog
-
-[Service]
-Type = simple
-ExecStart = /usr/local/bin/flog -d {{ flog_write_speed }} -t log -o {{ flog_test_log_file }} -l -w
-
-TimeoutStopSec = 20
-ExecStop = /bin/kill -2 $MAINPID

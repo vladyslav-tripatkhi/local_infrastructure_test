@@ -4,6 +4,19 @@ data_dir = "/var/lib/vector"
     type = "file"
     include = ["/tmp/test_log/*"]
 
+[transforms.log_to_metric_transform]
+  type = "log_to_metric"
+  inputs = ["test_file"]
+
+  [[transforms.log_to_metric_transform.metrics]]
+    type = "counter"
+    field = "host"
+    increment_by_value = false
+    name = "counter"
+
+    [transforms.log_to_metric_transform.metrics.tags]
+      host = "${HOSTNAME}"
+
 [sinks.test_kafka_sink]
   type = "kafka"
   inputs = ["test_file"]
@@ -12,7 +25,15 @@ data_dir = "/var/lib/vector"
   key_field = "user_id"
   topic = "kafka_vector_topic"
 
-[sinks.test_sink]
-    type = "file"
-    inputs = ["test_file"]
-    path = "/tmp/vector-%Y-%m-%d.log"
+  [sinks.test_kafka_sink.buffer]
+    type = "disk"
+    when_full = "block"
+    num_items = 3000000
+    max_size = 2147483648
+
+[sinks.prometheus]
+  type = "prometheus"
+  inputs = ["log_to_metric_transform"]
+  address = "0.0.0.0:9598"
+  namespace = "vector"
+  buckets = [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]

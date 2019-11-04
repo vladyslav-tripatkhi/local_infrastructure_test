@@ -20,6 +20,9 @@ telegraf_config:
         service_address: ":8125"
         delete_gauges: false
         metric_separator: "_"
+    - name: prometheus
+      attributes:
+        urls: ["http://vector:9598"]
   output_plugins:
     - name: file
       attributes:
