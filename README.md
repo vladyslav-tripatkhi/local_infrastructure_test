@@ -7,3 +7,6 @@
 * Cleanup roles from redundant files.
 * Make grafana dashboard configurable.
 * Properly override telegraf_config variable.
+
+
+* If any time left: add unit-tests using molecule
