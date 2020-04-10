@@ -51,7 +51,7 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.vm.define "application", primary: true do |application|
+  config.vm.define "log_generator", primary: true do |application|
     
     application.vm.hostname = application_options.dig("hostname")
 
