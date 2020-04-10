@@ -1,7 +1,7 @@
 ---
 # Flog configuration variables
 flog_image_full_name: "{{ flog_image_name }}:{{ flog_image_tag }}"
-flog_repords_per_second: 15000
+flog_repords_per_second: 100
 
 # Telegraf configuration variables
 telegraf_config_template: "{{ telegraf_config_file }}.j2"
