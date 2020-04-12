@@ -17,3 +17,6 @@ config.yml
 
 # Vagrant box files
 base/*.box
+
+#predefined events template
+ansible/roles/deploy/templates/predefined_lines.j2

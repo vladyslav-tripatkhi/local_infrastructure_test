@@ -70,7 +70,35 @@
     state: present
     user: root
 
-- name: launch flog container
+- name: configure predefined lines for flog
+  ignore_errors: yes
+  template:
+    src: predefined_lines.j2
+    dest: /tmp/test_log/predefined_lines
+    mode: 0644
+    owner: root
+    group: root
+
+- name: launch flog container with predefined lines
+  docker_container:
+    name: flog
+    image: "{{ flog_image_full_name }}"
+    state: started
+    command: [
+      "-n", "{{ flog_repords_per_second }}",
+      "-m", "telegraf",
+      "--predefined", "{{ flog_predefined_lines }}"
+    ]
+    env:
+      SLEEP_TIME: "1"
+      LOG_FILE_PATH: "/tmp/test_log/test.log"
+    volumes:
+      - /tmp/test_log:/tmp/test_log
+    networks:
+      - name: "{{ docker_network_name }}"
+  when: flog_predefined_lines is defined and flog_predefined_lines != ""
+
+- name: launch flog container - default format
   docker_container:
     name: flog
     image: "{{ flog_image_full_name }}"
@@ -86,3 +114,4 @@
       - /tmp/test_log:/tmp/test_log
     networks:
       - name: "{{ docker_network_name }}"
+  when: flog_predefined_lines is not defined or flog_predefined_lines == ""

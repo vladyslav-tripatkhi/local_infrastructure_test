@@ -4,7 +4,7 @@ pip_configure: true
 pip_upgrade: true
 
 # Flog configuration defaults
-flog_repo_url: https://github.com/vladyslav-tripatkhi/flog.git
+flog_repo_url: https://github.com/OleksiiDuzhyi/flog.git
 flog_repo_dest: /opt/flog
 flog_repo_branch: master
 flog_repo_cleanup: false

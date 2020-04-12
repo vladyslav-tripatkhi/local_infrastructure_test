@@ -108,3 +108,32 @@ To kill virtual machines simply run:
 ```
 vagrant destroy
 ```
+
+### How to generate custom events?
+
+`flog` is generating default format, something like this:
+
+```
+226.156.111.143 - lynch5673 [12/Apr/2020:07:46:00 +0000] "PATCH /paradigms/convergence/world-class HTTP/1.0" 500 759
+91.197.81.189 - stark4126 [12/Apr/2020:07:46:00 +0000] "GET /relationships/networks HTTP/1.0" 503 7778
+117.85.27.219 - - [12/Apr/2020:07:46:00 +0000] "HEAD /clicks-and-mortar/seamless/aggregate HTTP/2.0" 405 9845
+200.129.107.125 - johns8641 [12/Apr/2020:07:46:00 +0000] "PATCH /24%2f365/extensible/viral/harness HTTP/1.0" 406 1834
+74.171.209.110 - - [12/Apr/2020:07:46:00 +0000] "PUT /syndicate HTTP/1.1" 301 11236
+75.21.217.249 - padberg6428 [12/Apr/2020:07:46:00 +0000] "PUT /customized/metrics/synthesize HTTP/1.1" 205 4763
+```
+
+But it might be useful to generate predefined events to be able to debug processing of those events locally.
+In order to do this - create the following file `ansible/roles/deploy/templates/predefined_lines.j2` with desired content
+in the specified format
+
+```
+event1\r\nevent2
+```
+
+These lines are going to be used in round robin fashion and the output log will look like:
+
+```
+event1
+event2
+event1
+```

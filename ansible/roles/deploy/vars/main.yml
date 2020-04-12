@@ -1,6 +1,7 @@
 ---
 # Flog configuration variables
 flog_image_full_name: "{{ flog_image_name }}:{{ flog_image_tag }}"
+flog_predefined_lines: "{{ lookup('file', '/tmp/test_log/predefined_lines', errors='ignore') }}"
 flog_repords_per_second: 100
 
 # Telegraf configuration variables
