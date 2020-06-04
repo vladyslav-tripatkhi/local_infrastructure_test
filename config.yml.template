@@ -9,3 +9,8 @@ application:
   cpus: APPLICATION_VM_CPUS
   memory: APPLICATION_VM_MEMORY
   ip: 192.169.56.103
+zookeeper:
+  hostname: ZOOKEEPER_VM_HOSTNAME
+  cpus: ZOOKEEPER_VM_CPUS
+  memory: ZOOKEEPER_VM_MEMORY
+  ip: 192.169.56.104

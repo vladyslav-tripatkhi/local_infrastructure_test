@@ -22,6 +22,10 @@ MONITORING_VM_HOSTNAME=monitoring.example.test
 MONITORING_VM_CPUS=2
 MONITORING_VM_MEMORY=6144
 
+ZOOKEEPER_VM_HOSTNAME=zookeeper.example.test
+ZOOKEEPER_VM_CPUS=2
+ZOOKEEPER_VM_MEMORY=3072
+
 
 all:
 	echo "DUMMY"
@@ -30,8 +34,7 @@ launch: python_virtualenv_setup base_box_build render_template vagrant_launch
 
 python_virtualenv_setup:
 	python -m virtualenv -p ${PYTHON_BIN} virtualenv; \
-	source virtualenv/bin/activate; \
-	pip install -r requirements.txt; \
+	virtualenv/bin/pip install -r requirements.txt; \
 	echo "Python virtualenv has been installed successfully."; \
 	echo "To use it, type 'source virtualenv/bin/activate' in your console."
 
@@ -61,10 +64,16 @@ render_template:
 		-e "s/MONITORING_VM_HOSTNAME/\"${MONITORING_VM_HOSTNAME}\"/g" \
 		-e "s/MONITORING_VM_CPUS/${MONITORING_VM_CPUS}/g" \
 		-e "s/MONITORING_VM_MEMORY/${MONITORING_VM_MEMORY}/g" \
+		-e "s/ZOOKEEPER_VM_HOSTNAME/\"${ZOOKEEPER_VM_HOSTNAME}\"/g" \
+		-e "s/ZOOKEEPER_VM_CPUS/${ZOOKEEPER_VM_CPUS}/g" \
+		-e "s/ZOOKEEPER_VM_MEMORY/${ZOOKEEPER_VM_MEMORY}/g" \
 	config.yml.template > config.yml
 
 vagrant_launch:
 	echo "vagrant up"
+
+vagrant_launch_zookeeper:
+	vagrant up zookeeper
 
 vagrant_destroy:
 	echo "vagrant destroy -f"

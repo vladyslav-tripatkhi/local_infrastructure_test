@@ -1,0 +1,9 @@
+---
+  - hosts: all
+    remote_user: vagrant
+    become: true
+    vars:
+      applications:
+        - zookeeper_ensemble
+    roles:
+      - deploy

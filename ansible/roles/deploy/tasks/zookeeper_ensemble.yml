@@ -1,0 +1,56 @@
+- name: pull latest zookeeper image
+  docker_image:
+    name: tripathi995/zookeeper:3.4.5
+    source: pull
+
+- name: launch zookeeper container
+  docker_container:
+    name: "zookeeper-{{ zk_index }}"
+    hostname: "zookeeper-{{ zk_index }}"
+    image: tripathi995/zookeeper:3.4.5
+    env:
+      ZK_MY_ID: "{{ zk_index }}"
+      ZK_SERVERS: zookeeper-1,zookeeper-2,zookeeper-3
+      JMXLOCALONLY: "false"
+      JMXDISABLE: "false"
+      SERVER_JVMFLAGS: "-Djava.rmi.server.hostname=192.169.56.104 -Dcom.sun.management.jmxremote.rmi.port=799{{ zk_index }} -Dcom.sun.management.jmxremote.port=799{{ zk_index }} -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+    ports:
+      - "218{{ zk_index }}:2181"
+      - "288{{ zk_index }}:2888"
+      - "388{{ zk_index }}:3888"
+      - "799{{ zk_index }}:799{{ zk_index }}"
+    volumes:
+      - "/opt/zookeeper-{{ zk_index }}/data:/opt/zookeeper-3.4.5/data"
+    purge_networks: true
+    networks:
+      - name: "{{ docker_network_name }}"
+    etc_hosts:
+      zookeeper.example.test: 192.169.56.104
+    restart_policy: unless-stopped
+  with_sequence: count=3
+  loop_control:
+    loop_var: zk_index
+
+- name: launch additional zookeeper container
+  docker_container:
+    name: "zookeeper-{{ zk_index }}"
+    hostname: "zookeeper-{{ zk_index }}"
+    image: tripathi995/zookeeper:3.4.5
+    env:
+      ZK_MY_ID: "{{ zk_index }}"
+      ZK_SERVERS: zookeeper-1,zookeeper-2,zookeeper-3,zookeeper-4,zookeeper-5
+    ports:
+      - "218{{ zk_index }}:2181"
+      - "288{{ zk_index }}:2888"
+      - "388{{ zk_index }}:3888"
+    volumes:
+      - "/opt/zookeeper-{{ zk_index }}/data:/opt/zookeeper-3.4.5/data"
+    purge_networks: true
+    networks:
+      - name: "{{ docker_network_name }}"
+    etc_hosts:
+      zookeeper.example.test: 192.169.56.104
+    restart_policy: unless-stopped
+  with_sequence: start=4 end=5
+  loop_control:
+    loop_var: zk_index
