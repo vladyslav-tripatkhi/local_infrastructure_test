@@ -24,6 +24,10 @@ data_dir = "/var/lib/vector"
   encoding = "json"
   key_field = "user_id"
   topic = "kafka_vector_topic"
+  librdkafka_options."linger.ms" = "200"
+  librdkafka_options."batch.num.messages" = "10000"
+  librdkafka_options."batch.size" = "1000000"
+  librdkafka_options."message.max.bytes" = "1000000"
 
   [sinks.test_kafka_sink.buffer]
     type = "disk"
